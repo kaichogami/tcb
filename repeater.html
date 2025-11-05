@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Pattern Repeater</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #ffffff;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            border-bottom: 1px solid #eeeeee;
+        }
+
+        .logo img {
+            height: 40px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #666666;
+            margin: 0 10px;
+        }
+
+        .nav a:hover {
+            color: #333333;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            margin: 40px auto;
+        }
+        h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 16px;
+            color: #666666;
+            margin-bottom: 20px;
+        }
+        #grid-container {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(60px, 1fr));
+            grid-gap: 10px;
+            margin-bottom: 20px;
+            max-width: 400px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .grid-cell {
+            width: 100%;
+            padding-bottom: 100%;
+            background-color: #f0f0f0;
+            border: 1px solid #dddddd;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .grid-cell.active {
+            background-color: #999999;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        #status {
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <a href="main.html"><img src="tribal-man.png" alt="The Cool Tribe Logo"></a>
+        </div>
+        <div class="nav">
+            <a href="main.html">The Cool Tribe</a> > 
+            <a href="focus.html">Focus Games</a> > 
+            <span>The Pattern Repeater</span>
+        </div>
+    </div>
+    <div class="container">
+        <h1>The Pattern Repeater</h1>
+        <p>Watch the sequence and repeat it by clicking on the grid. The sequence length increases by 1 after each successful round.</p>
+        <div id="status"></div>
+        <div id="grid-container"></div>
+        <p>Score: <span id="score">0</span></p>
+        <button id="start-button">Start</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const gridContainer = document.getElementById("grid-container");
+        const scoreElement = document.getElementById("score");
+        const startButton = document.getElementById("start-button");
+        const resultElement = document.getElementById("result");
+        const statusElement = document.getElementById("status");
+
+        let sequence = [];
+        let userSequence = [];
+        let score = 0;
+        let level = 2;
+        let gameInProgress = false;
+        let userTurn = false;
+
+        function showScoreCard(status) {
+            let message = "";
+            if (status === "lose") {
+                message = `<h2>Game Over!</h2><p>You made a mistake.</p><p>Your score: ${score}</p>`;
+            } else if (status === "distracted") {
+                message = `<h2>Game Over!</h2><p>You were distracted and switched tabs.</p><p>Your score: ${score}</p>`;
+            }
+            resultElement.innerHTML = message;
+            startButton.disabled = false;
+            gameInProgress = false;
+        }
+
+        function createGrid() {
+            for (let i = 0; i < 16; i++) {
+                const cell = document.createElement("div");
+                cell.classList.add("grid-cell");
+                cell.dataset.index = i;
+                cell.addEventListener("click", () => {
+                    if (userTurn && gameInProgress && userSequence.length < sequence.length) {
+                        cell.classList.add("active");
+                        setTimeout(() => cell.classList.remove("active"), 200);
+                        userSequence.push(parseInt(cell.dataset.index));
+                        if (userSequence.length === sequence.length) {
+                            checkSequence();
+                        }
+                    }
+                });
+                gridContainer.appendChild(cell);
+            }
+        }
+
+        function generateSequence() {
+            sequence = [];
+            for (let i = 0; i < level; i++) {
+                sequence.push(Math.floor(Math.random() * 16));
+            }
+        }
+
+        function playSequence() {
+            userTurn = false;
+            statusElement.textContent = "Watch the pattern";
+            let i = 0;
+            const interval = setInterval(() => {
+                if (!gameInProgress) {
+                    clearInterval(interval);
+                    return;
+                }
+                const cell = gridContainer.children[sequence[i]];
+                cell.classList.add("active");
+                setTimeout(() => cell.classList.remove("active"), 500);
+                i++;
+                if (i >= sequence.length) {
+                    clearInterval(interval);
+                    userTurn = true;
+                    statusElement.textContent = "Your turn";
+                }
+            }, 1000);
+        }
+
+        function checkSequence() {
+            let correct = true;
+            for (let i = 0; i < sequence.length; i++) {
+                if (sequence[i] !== userSequence[i]) {
+                    correct = false;
+                    break;
+                }
+            }
+
+            if (correct) {
+                score++;
+                scoreElement.textContent = score;
+                level += 1;
+                userSequence = [];
+                generateSequence();
+                setTimeout(playSequence, 1000);
+            } else {
+                showScoreCard("lose");
+            }
+        }
+
+        startButton.addEventListener("click", () => {
+            score = 0;
+            level = 2;
+            scoreElement.textContent = score;
+            userSequence = [];
+            generateSequence();
+            playSequence();
+            startButton.disabled = true;
+            resultElement.innerHTML = "";
+            gameInProgress = true;
+        });
+
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden && gameInProgress) {
+                showScoreCard("distracted");
+            }
+        });
+
+        createGrid();
+    </script>
+</body>
+</html>

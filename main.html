@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Cool Tribe</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #ffffff;
+            color: #333333;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin: 40px 0 20px 0;
+        }
+
+        .logo {
+            font-size: 48px;
+            font-weight: bold;
+            letter-spacing: -2px;
+            margin-bottom: 10px;
+        }
+
+        .logo img {
+            height: 60px; /* Adjust as needed */
+            vertical-align: middle;
+        }
+
+        .logo span {
+            color: #999999;
+        }
+
+        .tagline {
+            color: #666666;
+            font-size: 18px;
+        }
+
+        .grid-container {
+            max-width: 1200px;
+            margin: 60px auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 30px;
+            text-decoration: none;
+            color: #333333;
+            border: 1px solid #eeeeee;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            min-height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+            border-color: #dddddd;
+        }
+
+        .card-title {
+            font-size: 24px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            padding: 20px;
+            color: #999999;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .logo {
+                font-size: 36px;
+            }
+
+            .card {
+                padding: 25px;
+                min-height: 120px;
+            }
+
+            .card-title {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo"><img src="tribal-man.png" alt="The Cool Tribe Logo"></div>
+        <div class="tagline">The Cool Tribe</div>
+    </div>
+
+    <div class="grid-container">
+        <!-- Card 1 -->
+        
+
+        <!-- Card 10 -->
+        <a href="focus.html" class="card">
+            <div class="card-title">Focus Stuff</div>
+        </a>
+    </div>
+
+    <footer>
+        Made with coolness | 2025
+    </footer>
+</body>
+</html>

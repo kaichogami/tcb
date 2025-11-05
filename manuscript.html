@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Monotonous Manuscript</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #ffffff;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            border-bottom: 1px solid #eeeeee;
+        }
+
+        .logo img {
+            height: 40px;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: #666666;
+            margin: 0 10px;
+        }
+
+        .nav a:hover {
+            color: #333333;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            margin: 40px auto;
+        }
+        h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        p {
+            font-size: 16px;
+            color: #666666;
+            margin-bottom: 20px;
+        }
+        #sentence-to-type {
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            line-height: 1.5;
+        }
+        #typing-area {
+            width: 100%;
+            height: 100px;
+            font-size: 1.2em;
+            padding: 10px;
+            border: 1px solid #dddddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        #result {
+            margin-top: 20px;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .stat {
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">
+            <a href="main.html"><img src="tribal-man.png" alt="The Cool Tribe Logo"></a>
+        </div>
+        <div class="nav">
+            <a href="main.html">The Cool Tribe</a> > 
+            <a href="focus.html">Focus Games</a> > 
+            <span>The Monotonous Manuscript</span>
+        </div>
+    </div>
+    <div class="container">
+        <h1>The Monotonous Manuscript</h1>
+        <p>Type the following sentence 50 times. You cannot edit your input, so type carefully.</p>
+        <div id="sentence-to-type"></div>
+        <button id="randomize-button">Randomize Sentence</button>
+        <textarea id="typing-area" autofocus></textarea>
+        <div class="stats">
+            <div class="stat">Repetitions: <span id="repetition-count">0</span></div>
+            <div class="stat">Errors: <span id="error-count">0</span></div>
+            <div class="stat">Live Accuracy: <span id="live-accuracy">100.00</span>%</div>
+            <div class="stat">Max Possible Score: <span id="max-possible-score">100.00</span>%</div>
+        </div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        let sentenceToType;
+        const repetitions = 50;
+        let repetitionCount = 0;
+        let totalErrors = 0;
+        let totalTypedChars = 0;
+        let startTime;
+
+        const sentenceElement = document.getElementById("sentence-to-type");
+        const typingArea = document.getElementById("typing-area");
+        const repetitionCountElement = document.getElementById("repetition-count");
+        const errorCountElement = document.getElementById("error-count");
+        const liveAccuracyElement = document.getElementById("live-accuracy");
+        const maxPossibleScoreElement = document.getElementById("max-possible-score");
+        const resultElement = document.getElementById("result");
+        const randomizeButton = document.getElementById("randomize-button");
+
+        let sentences = [];
+
+        function showScoreCard(status) {
+            const endTime = new Date();
+            const timeTaken = startTime ? (endTime - startTime) / 1000 : 0;
+            const accuracy = totalTypedChars > 0 ? ((totalTypedChars - totalErrors) / totalTypedChars) * 100 : 100;
+            let message = "";
+
+            if (status === "win") {
+                message = `<h2>Congratulations!</h2>
+                    <p>You completed the challenge in ${timeTaken.toFixed(2)} seconds.</p>
+                    <p>Your accuracy: ${accuracy.toFixed(2)}%</p>`;
+            } else if (status === "distracted") {
+                message = `<h2>Game Over!</h2>
+                    <p>You were distracted and switched tabs.</p>
+                    <p>Your accuracy: ${accuracy.toFixed(2)}%</p>`;
+            }
+
+            resultElement.innerHTML = message;
+            typingArea.disabled = true;
+        }
+
+        fetch("focus-sentences.txt")
+            .then(response => response.text())
+            .then(text => {
+                sentences = text.split("\n").filter(sentence => sentence.length > 0);
+                randomizeSentence();
+            });
+
+        function randomizeSentence() {
+            sentenceToType = sentences[Math.floor(Math.random() * sentences.length)];
+            sentenceElement.innerHTML = sentenceToType;
+        }
+
+        randomizeButton.addEventListener("click", randomizeSentence);
+
+        typingArea.addEventListener("keydown", (e) => {
+            if (e.key === "Backspace" || e.key === "Delete") {
+                e.preventDefault();
+            }
+            if (e.ctrlKey && e.key === 'a') {
+                e.preventDefault();
+            }
+        });
+
+        typingArea.addEventListener("input", () => {
+            if (!startTime) {
+                startTime = new Date();
+                randomizeButton.style.display = "none";
+            }
+            const typedText = typingArea.value;
+            const currentLength = typedText.length;
+
+            // Update stats for the last typed character
+            if (currentLength > 0) {
+                if (typedText[currentLength - 1] !== sentenceToType[currentLength - 1]) {
+                    if(currentLength <= totalTypedChars) {
+                        // do nothing if user is backspacing
+                    } else {
+                        totalErrors++;
+                    }
+                }
+            }
+            totalTypedChars = currentLength;
+            errorCountElement.textContent = totalErrors;
+
+            // Update live accuracy
+            const liveAccuracy = totalTypedChars > 0 ? ((totalTypedChars - totalErrors) / totalTypedChars) * 100 : 100;
+            liveAccuracyElement.textContent = liveAccuracy.toFixed(2);
+
+            // Update max possible score
+            const remainingChars = (repetitions * sentenceToType.length) - totalTypedChars;
+            const maxPossibleScore = ((totalTypedChars - totalErrors) + remainingChars) / (repetitions * sentenceToType.length) * 100;
+            maxPossibleScoreElement.textContent = maxPossibleScore.toFixed(2);
+
+            // Highlight text
+            let highlightedText = '';
+            for (let i = 0; i < sentenceToType.length; i++) {
+                if (i < currentLength) {
+                    if (typedText[i] === sentenceToType[i]) {
+                        highlightedText += `<span style="color: green;">${sentenceToType[i]}</span>`;
+                    } else {
+                        highlightedText += `<span style="color: red;">${sentenceToType[i]}</span>`;
+                    }
+                } else if (i === currentLength) {
+                    highlightedText += `<span style="background-color: yellow;">${sentenceToType[i]}</span>`;
+                } else {
+                    highlightedText += sentenceToType[i];
+                }
+            }
+            sentenceElement.innerHTML = highlightedText;
+
+            if (currentLength >= sentenceToType.length) {
+                repetitionCount++;
+                repetitionCountElement.textContent = repetitionCount;
+                typingArea.value = "";
+                totalTypedChars = 0;
+                totalErrors = 0;
+                if (repetitionCount === repetitions) {
+                    showScoreCard("win");
+                } else {
+                    setTimeout(() => {
+                        sentenceElement.innerHTML = sentenceToType;
+                    }, 200);
+                }
+            }
+        });
+
+        document.addEventListener("visibilitychange", () => {
+            if (document.hidden) {
+                showScoreCard("distracted");
+            }
+        });
+    </script>
+</body>
+</html>
